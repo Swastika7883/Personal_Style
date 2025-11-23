@@ -53,7 +53,7 @@ analyzeBtn.addEventListener('click', function() {
     formData.append('image', imageUpload.files[0]);
     
     // Send the image to the FastAPI backend for processing
-    axios.post('http://localhost:8000/api/analyze', formData, {
+    axios.post('https://personal-style-backend.onrender.com/api/analyze', formData, {
         headers: {
             'Content-Type': 'multipart/form-data'
         }
