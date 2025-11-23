@@ -1,6 +1,9 @@
 -- PostgreSQL-compatible SQL Dump
 -- Converted from MySQL
 
+-- Drop table if exists (for idempotent deployment)
+DROP TABLE IF EXISTS outfits CASCADE;
+
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 
@@ -68,3 +71,4 @@ CREATE INDEX ix_outfits_undertone_match ON outfits (undertone_match);
 
 -- Set the sequence to continue from the highest ID
 SELECT setval('outfits_id_seq', (SELECT MAX(id) FROM outfits));
+

@@ -25,7 +25,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Undertone Analysis API", version="1.0.0")
 
 origins = [
-    "http://localhost:8080",
+    "https://personal-style-backend.onrender.com",
     "localhost:8080"
 ]
 
