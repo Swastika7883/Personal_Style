@@ -26,7 +26,7 @@ app = FastAPI(title="Undertone Analysis API", version="1.0.0")
 
 origins = [
     "https://personal-style-backend.onrender.com",
-    "localhost:8080"
+    "https://personal-style-frontend.onrender.com"
 ]
 
 # Configure CORS
