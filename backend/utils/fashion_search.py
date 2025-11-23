@@ -11,8 +11,9 @@ import sys
 logger = logging.getLogger(__name__)
 
 # 🔑 API credentials
-API_KEY = os.getenv("GOOGLE_API_KEY", "AIzaSyCUgBS_W6epjwLhhIbUOXFJbTxah6yldDg")
-CSE_ID = os.getenv("GOOGLE_CSE_ID", "e1b062028673e42d9")
+API_KEY = os.getenv("GOOGLE_API_KEY")
+CSE_ID = os.getenv("GOOGLE_CSE_ID")
+
 
 # 🔁 Cache threshold
 CACHE_MINIMUM_COUNT = 10  # Increased to ensure we have enough items
