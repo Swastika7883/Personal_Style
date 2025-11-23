@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Undertone Analysis & Dress Recommendation</title>
+    <style>
+
+        
+        /* Body Shape Detection Styles */
+        .body-shape-section {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .body-shape-btn {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 12px 25px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .body-shape-btn:hover {
+            background-color: #ff5252;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .body-shape-form {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            position: relative;
+        }
+        
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #e0e0e0;
+            transform: translateY(-50%);
+            z-index: 1;
+        }
+        
+        .progress-step {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .progress-step.active {
+            background-color: #6a5acd;
+            color: white;
+        }
+        
+        .progress-step.completed {
+            background-color: #28a745;
+            color: white;
+        }
+        
+        .form-step {
+            display: none;
+        }
+        
+        .form-step.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .form-step h2 {
+            margin-bottom: 20px;
+            color: #6a5acd;
+            font-size: 1.6rem;
+        }
+        
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .radio-option:hover {
+            border-color: #8a7cff;
+            background-color: rgba(106, 90, 205, 0.05);
+        }
+        
+        .radio-option.selected {
+            border-color: #6a5acd;
+            background-color: rgba(106, 90, 205, 0.1);
+        }
+        
+        .radio-option input {
+            margin-right: 10px;
+        }
+        
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: #6a5acd;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #8a7cff;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .btn-refresh {
+            background-color: #17a2b8;
+            color: white;
+            margin-left: 10px;
+        }
+        
+        .btn-refresh:hover {
+            background-color: #138496;
+        }
+        
+        .body-shape-results {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            display: none;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .body-shape-icon {
+            font-size: 4rem;
+            margin-bottom: 15px;
+        }
+        
+        .body-shape-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #6a5acd;
+        }
+        
+        .body-shape-description {
+            margin-bottom: 20px;
+            font-size: 1rem;
+        }
+        
+        .body-shape-recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .outfit-card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+        
+        .outfit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .outfit-image {
+            height: 150px;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: #8a7cff;
+        }
+        
+        .outfit-details {
+            padding: 12px;
+        }
+        
+        .outfit-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+        
+        .outfit-description {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Find Your Perfect Colors</h1>
+            <p>Upload your photo to discover your undertone and get personalized fashion recommendations</p>
+        </header>
+
+        <div class="upload-section">
+            <input type="file" id="imageUpload" accept="image/*" hidden>
+            <div class="upload-area" id="uploadArea">
+                <img src="images/upload-icon.svg" alt="Upload" class="upload-icon">
+                <p>Click to upload your photo</p>
+            </div>
+            <button id="analyzeBtn" class="btn" disabled>Analyze Undertone</button>
+        </div>
+
+        <!-- Body Shape Section -->
+        <div class="body-shape-section">
+            <button class="body-shape-btn" id="bodyShapeBtn">Discover Your Body Shape</button>
+            
+            <div class="body-shape-form" id="bodyShapeForm">
+                <div class="progress-bar">
+                    <div class="progress-step active" id="step-1">1</div>
+                    <div class="progress-step" id="step-2">2</div>
+                    <div class="progress-step" id="step-3">3</div>
+                    <div class="progress-step" id="step-4">4</div>
+                </div>
+                
+                <!-- Step 1: Waist to Hip Ratio -->
+                <div class="form-step active" id="step1">
+                    <h2>Describe your waist in relation to your hips</h2>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="waist-hip" value="significantly-smaller">
+                            <span>My waist is significantly smaller than my hips</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="waist-hip" value="slightly-smaller">
+                            <span>My waist is a little smaller than my hips</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="waist-hip" value="same">
+                            <span>My waist is the same as my hips</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="waist-hip" value="bigger">
+                            <span>My waist is bigger than my hips</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button class="btn btn-secondary" disabled>Previous</button>
+                        <div>
+                            <button class="btn btn-primary" id="next1">Next</button>
+                            <button class="btn btn-refresh" id="refresh1">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Shoulder to Hip Ratio -->
+                <div class="form-step" id="step2">
+                    <h2>Describe your shoulders in relation to your hips</h2>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="shoulder-hip" value="narrower">
+                            <span>My shoulders are narrower than my hips</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="shoulder-hip" value="same">
+                            <span>My shoulders are about the same width as my hips</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="shoulder-hip" value="broader">
+                            <span>My shoulders are broader than my hips</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button class="btn btn-secondary" id="prev2">Previous</button>
+                        <div>
+                            <button class="btn btn-primary" id="next2">Next</button>
+                            <button class="btn btn-refresh" id="refresh2">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Bust to Waist Ratio -->
+                <div class="form-step" id="step3">
+                    <h2>Describe your bust in relation to your waist</h2>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="bust-waist" value="smaller">
+                            <span>My bust is smaller than my waist</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="bust-waist" value="same">
+                            <span>My bust is about the same size as my waist</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="bust-waist" value="larger">
+                            <span>My bust is larger than my waist</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button class="btn btn-secondary" id="prev3">Previous</button>
+                        <div>
+                            <button class="btn btn-primary" id="next3">Next</button>
+                            <button class="btn btn-refresh" id="refresh3">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 4: Weight Distribution -->
+                <div class="form-step" id="step4">
+                    <h2>Where do you tend to gain weight first?</h2>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="weight-dist" value="upper">
+                            <span>Upper body (arms, chest, back)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="weight-dist" value="middle">
+                            <span>Middle section (waist, stomach)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="weight-dist" value="lower">
+                            <span>Lower body (hips, thighs)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="weight-dist" value="even">
+                            <span>Evenly distributed throughout my body</span>
+                        </label>
+                    </div>
+                    <div class="navigation">
+                        <button class="btn btn-secondary" id="prev4">Previous</button>
+                        <div>
+                            <button class="btn btn-primary" id="calculate">Calculate My Body Shape</button>
+                            <button class="btn btn-refresh" id="refresh4">Refresh</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body Shape Results -->
+            <div class="body-shape-results" id="bodyShapeResults">
+                <div class="body-shape-icon" id="shape-icon">⏳</div>
+                <h2 class="body-shape-title" id="shape-title">Your Body Shape</h2>
+                <p class="body-shape-description" id="shape-description"></p>
+                
+                <h3>Recommended Outfits</h3>
+                <div class="body-shape-recommendations" id="outfit-recommendations">
+                    <!-- Outfit cards will be generated here -->
+                </div>
+                
+                <div style="margin-top: 20px;">
+                    <button class="btn btn-primary" id="restart">Start Over</button>
+                    <button class="btn btn-refresh" id="refreshResults">Take Quiz Again</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="results-section hidden">
+            <div class="result-card">
+                <h2>Your Undertone Analysis</h2>
+                <div id="undertoneResult"></div>
+                <div id="colorPalette"></div>
+            </div>
+        </div>
+        
+        <div class="result-card">
+            <h2>Recommended Fashion Items</h2>
+            <div id="fashionResults"></div>
+        </div>
+
+        <div class="loading hidden" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing your undertone...</p>
+        </div>
+        
+        <div class="card">
+            <div class="boxy">
+                <div class="small-box">
+                    <img class="pics" src="https://i.pinimg.com/736x/2d/b1/16/2db11664a829058e0574a4f59659398b.jpg" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://i.pinimg.com/1200x/d1/5c/d9/d15cd9d7f41fe3dfef9b94e924bc5a6a.jpg" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://i.pinimg.com/1200x/1b/52/c1/1b52c12909d1eaf0616b444a3c103044.jpg" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://www.uoozee.com/cdn/shop/files/ffdd52f83db790ae48a3c0f65d36f999.jpg?v=1748447570&width=1280" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://i.pinimg.com/1200x/5d/85/f8/5d85f8d4e043bd607dd315cef0345146.jpg" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://www.uoozee.com/cdn/shop/files/73de006e7adbb7a66590939d9590a60c.jpg?v=1748403890&width=1280" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+                <div class="small-box">
+                    <img class="pics" src="https://i.pinimg.com/736x/7f/7d/cc/7f7dccb4815ad4a5e9ed124a2b3adcf5.jpg" alt="">
+                    <p>Long Sleeves Loose Elasticity Solid Color Zipper Lapel Jackets Outerwear $67.99 USD</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script src="js/script.js"></script>
+
+    <script>
+        // Body Shape Detection Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const bodyShapeBtn = document.getElementById('bodyShapeBtn');
+            const bodyShapeForm = document.getElementById('bodyShapeForm');
+            const bodyShapeResults = document.getElementById('bodyShapeResults');
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const step4 = document.getElementById('step4');
+            
+            const next1 = document.getElementById('next1');
+            const next2 = document.getElementById('next2');
+            const next3 = document.getElementById('next3');
+            const prev2 = document.getElementById('prev2');
+            const prev3 = document.getElementById('prev3');
+            const prev4 = document.getElementById('prev4');
+            const calculateBtn = document.getElementById('calculate');
+            const restartBtn = document.getElementById('restart');
+            
+            // Refresh buttons
+            const refresh1 = document.getElementById('refresh1');
+            const refresh2 = document.getElementById('refresh2');
+            const refresh3 = document.getElementById('refresh3');
+            const refresh4 = document.getElementById('refresh4');
+            const refreshResults = document.getElementById('refreshResults');
+            
+            const progressSteps = document.querySelectorAll('.progress-step');
+            
+            // Form data
+            const formData = {
+                waistHip: '',
+                shoulderHip: '',
+                bustWaist: '',
+                weightDist: ''
+            };
+            
+            // Event Listeners
+            bodyShapeBtn.addEventListener('click', () => {
+                bodyShapeForm.style.display = 'block';
+                bodyShapeBtn.style.display = 'none';
+                window.scrollTo({
+                    top: bodyShapeForm.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Navigation Event Listeners
+            next1.addEventListener('click', () => {
+                const selected = document.querySelector('input[name="waist-hip"]:checked');
+                if (selected) {
+                    formData.waistHip = selected.value;
+                    step1.classList.remove('active');
+                    step2.classList.add('active');
+                    updateProgress(2);
+                } else {
+                    alert('Please select an option to continue.');
+                }
+            });
+            
+            next2.addEventListener('click', () => {
+                const selected = document.querySelector('input[name="shoulder-hip"]:checked');
+                if (selected) {
+                    formData.shoulderHip = selected.value;
+                    step2.classList.remove('active');
+                    step3.classList.add('active');
+                    updateProgress(3);
+                } else {
+                    alert('Please select an option to continue.');
+                }
+            });
+            
+            next3.addEventListener('click', () => {
+                const selected = document.querySelector('input[name="bust-waist"]:checked');
+                if (selected) {
+                    formData.bustWaist = selected.value;
+                    step3.classList.remove('active');
+                    step4.classList.add('active');
+                    updateProgress(4);
+                } else {
+                    alert('Please select an option to continue.');
+                }
+            });
+            
+            prev2.addEventListener('click', () => {
+                step2.classList.remove('active');
+                step1.classList.add('active');
+                updateProgress(1);
+            });
+            
+            prev3.addEventListener('click', () => {
+                step3.classList.remove('active');
+                step2.classList.add('active');
+                updateProgress(2);
+            });
+            
+            prev4.addEventListener('click', () => {
+                step4.classList.remove('active');
+                step3.classList.add('active');
+                updateProgress(3);
+            });
+            
+            calculateBtn.addEventListener('click', () => {
+                const selected = document.querySelector('input[name="weight-dist"]:checked');
+                if (selected) {
+                    formData.weightDist = selected.value;
+                    calculateBodyShape();
+                } else {
+                    alert('Please select an option to continue.');
+                }
+            });
+            
+            // Refresh functionality
+            function refreshQuiz() {
+                // Reset form
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                
+                // Remove selected class from all radio options
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Reset form data
+                Object.keys(formData).forEach(key => {
+                    formData[key] = '';
+                });
+                
+                // Show first step
+                step2.classList.remove('active');
+                step3.classList.remove('active');
+                step4.classList.remove('active');
+                step1.classList.add('active');
+                
+                // Reset progress
+                updateProgress(1);
+                
+                // Hide results and form, show button
+                bodyShapeResults.style.display = 'none';
+                bodyShapeForm.style.display = 'none';
+                bodyShapeBtn.style.display = 'inline-block';
+                
+                // Scroll to button
+                window.scrollTo({
+                    top: bodyShapeBtn.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
+            
+            // Add refresh event listeners
+            refresh1.addEventListener('click', refreshQuiz);
+            refresh2.addEventListener('click', refreshQuiz);
+            refresh3.addEventListener('click', refreshQuiz);
+            refresh4.addEventListener('click', refreshQuiz);
+            refreshResults.addEventListener('click', refreshQuiz);
+            
+            restartBtn.addEventListener('click', () => {
+                // Reset form
+                document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.checked = false;
+                });
+                
+                // Remove selected class from all radio options
+                document.querySelectorAll('.radio-option').forEach(option => {
+                    option.classList.remove('selected');
+                });
+                
+                // Reset form data
+                Object.keys(formData).forEach(key => {
+                    formData[key] = '';
+                });
+                
+                // Show first step
+                step4.classList.remove('active');
+                step1.classList.add('active');
+                bodyShapeResults.style.display = 'none';
+                bodyShapeForm.style.display = 'block';
+                
+                // Reset progress
+                updateProgress(1);
+                
+                // Scroll to form
+                window.scrollTo({
+                    top: bodyShapeForm.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Radio option selection styling
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    const radio = option.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    
+                    // Remove selected class from all options in the group
+                    option.parentNode.querySelectorAll('.radio-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    
+                    // Add selected class to clicked option
+                    option.classList.add('selected');
+                });
+            });
+            
+            // Update progress bar
+            function updateProgress(step) {
+                progressSteps.forEach((progressStep, index) => {
+                    if (index < step) {
+                        progressStep.classList.add('completed');
+                        progressStep.classList.remove('active');
+                    } else if (index === step - 1) {
+                        progressStep.classList.add('active');
+                        progressStep.classList.remove('completed');
+                    } else {
+                        progressStep.classList.remove('active', 'completed');
+                    }
+                });
+            }
+            
+            // Calculate body shape based on form data
+            function calculateBodyShape() {
+                let bodyShape = '';
+                let description = '';
+                let icon = '';
+                
+                // Body shape determination logic
+                if (formData.waistHip === 'significantly-smaller' && 
+                    formData.shoulderHip === 'same' && 
+                    formData.bustWaist === 'larger') {
+                    bodyShape = 'Hourglass';
+                    description = 'Your bust and hips are well balanced with a clearly defined waist. This is considered the ideal body shape.';
+                    icon = '⏳';
+                } else if (formData.waistHip === 'slightly-smaller' && 
+                          formData.shoulderHip === 'narrower') {
+                    bodyShape = 'Pear';
+                    description = 'Your hips are wider than your shoulders with a defined waist. Weight tends to accumulate in the lower body.';
+                    icon = '🍐';
+                } else if (formData.waistHip === 'same' && 
+                          formData.shoulderHip === 'broader') {
+                    bodyShape = 'Inverted Triangle';
+                    description = 'Your shoulders are broader than your hips with little waist definition. You tend to carry weight in your upper body.';
+                    icon = '🔻';
+                } else if (formData.waistHip === 'bigger' || 
+                          formData.weightDist === 'middle') {
+                    bodyShape = 'Round';
+                    description = 'Your waist is the widest part of your body with weight concentrated in the midsection.';
+                    icon = '⭕';
+                } else if (formData.waistHip === 'same' && 
+                          formData.shoulderHip === 'same') {
+                    bodyShape = 'Rectangle';
+                    description = 'Your bust, waist, and hips are fairly equal in measurement with minimal curves.';
+                    icon = '📏';
+                } else {
+                    // Default case
+                    bodyShape = 'Hourglass';
+                    description = 'Based on your measurements, you appear to have a balanced figure with a defined waist.';
+                    icon = '⏳';
+                }
+                
+                // Update results
+                document.getElementById('shape-icon').textContent = icon;
+                document.getElementById('shape-title').textContent = bodyShape;
+                document.getElementById('shape-description').textContent = description;
+                
+                // Generate outfit recommendations
+                generateOutfitRecommendations(bodyShape);
+                
+                // Show results
+                bodyShapeForm.style.display = 'none';
+                bodyShapeResults.style.display = 'block';
+                
+                // Scroll to results
+                window.scrollTo({
+                    top: bodyShapeResults.offsetTop - 20,
+                    behavior: 'smooth'
+                });
+            }
+            
+            // Generate outfit recommendations based on body shape
+            function generateOutfitRecommendations(bodyShape) {
+                const recommendationsContainer = document.getElementById('outfit-recommendations');
+                recommendationsContainer.innerHTML = '';
+                
+                let outfits = [];
+                
+                // Outfit recommendations by body shape
+                switch(bodyShape) {
+                    case 'Hourglass':
+                        outfits = [
+                            { title: 'Wrap Dress', description: 'Accentuates your waist and highlights your curves', icon: '👗' },
+                            { title: 'Fitted Blazer', description: 'Defines your shoulders and waist for a polished look', icon: '🧥' },
+                            { title: 'High-Waisted Pants', description: 'Emphasizes your waist and elongates your legs', icon: '👖' },
+                            { title: 'Belted Tops', description: 'Draws attention to your narrow waist', icon: '👚' }
+                        ];
+                        break;
+                    case 'Pear':
+                        outfits = [
+                            { title: 'A-Line Skirt', description: 'Balances your hips and creates a flattering silhouette', icon: '👗' },
+                            { title: 'Dark Wash Jeans', description: 'Slims your lower body while providing comfort', icon: '👖' },
+                            { title: 'Structured Jacket', description: 'Adds volume to your shoulders to balance your figure', icon: '🧥' },
+                            { title: 'V-Neck Tops', description: 'Draws attention upward to your face and shoulders', icon: '👚' }
+                        ];
+                        break;
+                    case 'Inverted Triangle':
+                        outfits = [
+                            { title: 'V-Neck Top', description: 'Creates a vertical line to elongate your torso', icon: '👚' },
+                            { title: 'A-Line Dress', description: 'Adds volume to your lower body to balance broad shoulders', icon: '👗' },
+                            { title: 'Flared Pants', description: 'Adds volume to your lower body for better proportion', icon: '👖' },
+                            { title: 'Wrap Top', description: 'Softens your shoulder line and defines your waist', icon: '👕' }
+                        ];
+                        break;
+                    case 'Round':
+                        outfits = [
+                            { title: 'Empire Waist Dress', description: 'Defines your bustline while flowing over your midsection', icon: '👗' },
+                            { title: 'Structured Blazer', description: 'Creates clean lines and adds definition', icon: '🧥' },
+                            { title: 'Dark Monochromatic Outfits', description: 'Creates a slimming vertical line', icon: '🎽' },
+                            { title: 'V-Neck Tops', description: 'Elongates your torso and draws attention upward', icon: '👚' }
+                        ];
+                        break;
+                    case 'Rectangle':
+                        outfits = [
+                            { title: 'Peplum Top', description: 'Creates the illusion of curves and a defined waist', icon: '👚' },
+                            { title: 'Belted Dresses', description: 'Adds waist definition to your straight figure', icon: '👗' },
+                            { title: 'Ruffled Blouses', description: 'Adds volume and creates the appearance of curves', icon: '👕' },
+                            { title: 'Layered Outfits', description: 'Adds dimension and creates visual interest', icon: '🧥' }
+                        ];
+                        break;
+                    default:
+                        outfits = [
+                            { title: 'Wrap Dress', description: 'Flattering for most body types', icon: '👗' },
+                            { title: 'Structured Blazer', description: 'Adds definition to any silhouette', icon: '🧥' },
+                            { title: 'Dark Wash Jeans', description: 'Slimming and versatile', icon: '👖' },
+                            { title: 'V-Neck Tops', description: 'Elongates the neckline', icon: '👚' }
+                        ];
+                }
+                
+                // Create outfit cards
+                outfits.forEach(outfit => {
+                    const card = document.createElement('div');
+                    card.className = 'outfit-card';
+                    
+                    card.innerHTML = `
+                        <div class="outfit-image">${outfit.icon}</div>
+                        <div class="outfit-details">
+                            <div class="outfit-title">${outfit.title}</div>
+                            <div class="outfit-description">${outfit.description}</div>
+                        </div>
+                    `;
+                    
+                    recommendationsContainer.appendChild(card);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
