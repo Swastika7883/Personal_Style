@@ -4,13 +4,17 @@ __pycache__/
 *.pyo
 *.pyd
 
-# Virtual environment
+# Virtual environments
 venv/
 env/
 backend/venv/
 frontend/venv/
 
-# IDE
+# Environment variables
+.env
+*.env
+
+# IDE settings
 .vscode/
 .idea/
 
@@ -18,5 +22,17 @@ frontend/venv/
 .DS_Store
 Thumbs.db
 
-# Node (in case of frontend)
+# Node (frontend)
 node_modules/
+
+# Build artifacts
+dist/
+build/
+
+# Logs
+*.log
+logs/
+
+# Python packaging
+*.egg-info/
+.eggs/

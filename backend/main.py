@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session # NEW: Import Session
 from utils.image_processing import analyze_image
+import os
 
 # CHANGED: Import the database utility and model
 from database import engine, get_db 
@@ -78,4 +79,4 @@ async def root():
     return {"message": "Undertone Analysis API"}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
